@@ -44,3 +44,21 @@ AWS IAM 정책의 와일드카드(*) 권한 제거 및 최소 권한 원칙(Leas
 컨테이너 non-root 실행 및 경량 베이스 이미지 사용을 통한 가상화 레이어 Attack Surface 최소화
 
 
+
+---
+
+## 📋 부록: AWS 기반 AI 에이전트 인프라 보안성 검토서
+
+본 문서는 사내 LLM 에이전트 및 데이터 파이프라인을 AWS 클라우드 환경에 안전하게 배포하기 위해 수립한 인프라 보안 통제 항목 및 조치 가이드라인입니다.
+
+### 🎯 1. 네트워크 통제 정의 (Network Access Control)
+* **🚨 발견된 위험 (Risk):** AI 에이전트 컨테이너가 퍼블릭 서브넷에 위치할 경우 외부 공격자의 직접적인 표적이 되며 백엔드 DB로의 횡적 이동(Lateral Movement) 리스크 존재.
+* **🛡️ 통제 및 조치 표준 (Mitigation):** ALB만 퍼블릭 영역에 배치하고 에이전트는 **프라이빗 서브넷(Private Subnet)에 격리**. 사내 DB 보안 그룹은 오직 AI 에이전트 보안 그룹(`AI_AGENT_SG`)으로부터 들어오는 `TCP 5432` 포트 트래픽만 허용(Chaining 기법).
+
+### 🔑 2. IAM 계정 및 권한 관리 (Identity & Access Management)
+* **🚨 발견된 위험 (Risk):** IAM Role에 과도한 와일드카드(`*`) 권한 부여 시, 컨테이너 탈취 단계에서 AWS 계정 내 전체 인프라가 동시 노출됨.
+* **🛡️ 통제 및 조치 표준 (Mitigation):** `s3:GetObject` 등 필수 API만 명시하고, 자원 범위 제한(`*`)을 금지하여 **특정 S3 버킷의 ARN**으로 접근 범위를 최소화함.
+
+### 🐳 3. 컨테이너 인프라 하드닝 (Container Security)
+* **🚨 발견된 위험 (Risk):** 기본 `root` 사용자로 구동 시 컨테이너 이스케이프 취약점으로 인해 호스트 OS 제어권까지 상실할 위험 존재.
+* **🛡️ 통제 및 조치 표준 (Mitigation):** Dockerfile 내 `USER appuser` 지정을 의무화하여 권한을 제한하고, `python:3.9-slim` 같은 경량화 베이스 이미지를 채택하여 Attack Surface 최소화.
