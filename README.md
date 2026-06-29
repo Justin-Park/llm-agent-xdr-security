@@ -62,3 +62,9 @@ AWS IAM 정책의 와일드카드(*) 권한 제거 및 최소 권한 원칙(Leas
 ### 🐳 3. 컨테이너 인프라 하드닝 (Container Security)
 * **🚨 발견된 위험 (Risk):** 기본 `root` 사용자로 구동 시 컨테이너 이스케이프 취약점으로 인해 호스트 OS 제어권까지 상실할 위험 존재.
 * **🛡️ 통제 및 조치 표준 (Mitigation):** Dockerfile 내 `USER appuser` 지정을 의무화하여 권한을 제한하고, `python:3.9-slim` 같은 경량화 베이스 이미지를 채택하여 Attack Surface 최소화.
+
+---
+
+## 🛠️ 주요 트러블슈팅 (Troubleshooting) : 데이터 유출(Data Leak) 취약점 조치
+* **문제 상황:** AI 에이전트 접근 로그(`ai_agent_access.log`) 분석 중, 프롬프트 인젝션 공격 우회로 인해 실제 관리자 자격증명(`SuperSecurePassword123!`)이 원천 로그 데이터에 날것 그대로 노출되는 취약점 식별.
+* **해결 방안:** AI 최종 응답(Response) 출력 레이어에 정규표현식(Regex) 기반의 **DLP 필터링 엔진을 추가 구현**. 중요 패턴 탐지 즉시 `[🚨 MASKED_CREDENTIAL_WARNING]`으로 강제 치환 및 로그 상태를 `BLOCKED_BY_DLP`로 강제 전환하도록 로직을 교정하여 정보 유출 사고를 원천 차단함.
