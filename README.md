@@ -68,3 +68,9 @@ AWS IAM 정책의 와일드카드(*) 권한 제거 및 최소 권한 원칙(Leas
 ## 🛠️ 주요 트러블슈팅 (Troubleshooting) : 데이터 유출(Data Leak) 취약점 조치
 * **문제 상황:** AI 에이전트 접근 로그(`ai_agent_access.log`) 분석 중, 프롬프트 인젝션 공격 우회로 인해 실제 관리자 자격증명(`SuperSecurePassword123!`)이 원천 로그 데이터에 날것 그대로 노출되는 취약점 식별.
 * **해결 방안:** AI 최종 응답(Response) 출력 레이어에 정규표현식(Regex) 기반의 **DLP 필터링 엔진을 추가 구현**. 중요 패턴 탐지 즉시 `[🚨 MASKED_CREDENTIAL_WARNING]`으로 강제 치환 및 로그 상태를 `BLOCKED_BY_DLP`로 강제 전환하도록 로직을 교정하여 정보 유출 사고를 원천 차단함.
+
+---
+
+## 📋 부록: MCP 기반 AI 에이전트 서비스 보안성 검토 및 위험평가서
+* **서비스별  매칭:** `SaaS 및 AI 서비스 보안성 검토`, `Prompt Injection 대응`, `DLP/Masking 데이터 보호`
+* **핵심 요약:** MCP를 통해 사내 SaaS(Notion, Slack)와 연동된 LLM 에이전트 환경의 위험 평가 수행. 프롬프트 인젝션 입구 컷 필터 및 출력단 주민등록번호/API_KEY 정규표현식 기반 DLP 마스킹 레이어를 구축하여 데이터 유출 위험을 **High**에서 **Low**로 경감시킴. (상세 아키텍처 및 검증 코드는 주피터 노트북 본문 참조)
